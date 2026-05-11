@@ -1,132 +1,162 @@
-# claude-ai-workflows
+<p align="center">
+  <img src="https://img.shields.io/badge/HMZ-WORKFLOWS-15C1E6?style=for-the-badge&logoColor=white" alt="HMZ Workflows" height="60">
+</p>
 
-> **Automated BDM + lead generation workflows** running daily — LinkedIn sweeps, Indeed MCP pipelines, cold outreach, and client acquisition funnels.
+<h1 align="center">Claude AI Workflows</h1>
 
-Part of [claude-ai-system](https://github.com/hmzainjamil/claude-ai-system).
+<p align="center">
+  <strong>Production AI automation workflows — multi-agent pipelines, Claude Code skill chains, and LaunchAgent-powered scheduled tasks</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/hmzainjamil"><img src="https://img.shields.io/badge/By-HMZ-6C3EE8?style=for-the-badge" alt="By HMZ"></a>
+  <a href="#workflows"><img src="https://img.shields.io/badge/Workflows-50%2B-20A34E?style=for-the-badge" alt="50+ Workflows"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Multi--Agent-Enabled-F86606?style=for-the-badge" alt="Multi-Agent"></a>
+  <a href="#"><img src="https://img.shields.io/badge/n8n-8%2C000%2B-246DFF?style=for-the-badge" alt="n8n"></a>
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> &bull;
+  <a href="#workflows">Workflows</a> &bull;
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#use-cases">Use Cases</a> &bull;
+  <a href="#installation">Installation</a> &bull;
+  <a href="#resources">Resources</a>
+</p>
 
 ---
 
 ## Overview
 
-The HMZ AI workflow system runs autonomous business development and lead generation pipelines. Every workflow is scheduled, self-healing, and outputs structured data to Airtable/Notion/email.
+**Claude AI Workflows** documents the complete set of multi-agent and automation workflows running inside the HMZ AI system. These are not n8n JSON files — these are **meta-workflows**: Claude Code skill chains, agent orchestration patterns, and LaunchAgent-managed pipelines that combine multiple AI models, MCP tools, and external APIs into production-grade outcomes.
+
+Three categories of workflows:
+
+1. **Agent orchestration workflows** — how the 210 agents coordinate on complex tasks
+2. **Skill chain workflows** — how skills compose (e.g. `ads-strategy → ads-creative → ads-copy → market-launch`)
+3. **Scheduled pipeline workflows** — LaunchAgent-triggered daily/weekly automation chains
 
 ---
 
-## Active Workflow Categories
+## Workflows
 
-### BDM (Business Development) Sweeps
-
-**LinkedIn BDM Sweep**
-- Searches LinkedIn for high-ticket clients in target niches
-- Filters: budget signals, job titles, company size, location
-- Output: Qualified leads → Airtable CRM → personalized outreach sequence
-- Schedule: Daily (configurable)
-- Geo restrictions: Never India, Pakistan, Bangladesh, Philippines, Israel
-
-**Indeed MCP Pipeline**
-- Searches Indeed for freelance + contract opportunities
-- Filters: $15+/hr or $500+ fixed price, 90+ buyer score, <48hr posted
-- Platforms: LinkedIn + Indeed only (Upwork/Freelancer/PPH permanently removed)
-- Output: Matched jobs → cover letter generated → application queued
-- MCP: `anthropic-skills:client-hunting-indeed`
-
-### Lead Generation Workflows
-
-**Cold Email Outreach**
-- Prospect research → personalized PDF audit → cold email + PDF attachment
-- Each email includes: prospect's business name, city, brand palette
-- Tools: Apollo MCP, Hunter.io, ReportLab PDF generator
-- Output: Sent emails tracked in Airtable
-
-**Google Ads Audit Pipeline**
-- Scrapes prospect's Google Ads structure (via Playwright/Apify)
-- Generates 11-page PDF audit (ReportLab, client brand palette from URL)
-- Sends audit as lead magnet in cold email
-- Skills: `ads-reporting` + `report-creator` + `ads-strategy`
-
-**Reddit Lead Generation**
-- Posts value-content threads in target subreddits
-- Cap: 1 post per day MAX (account on bot-watch — never 2-3/day)
-- Tracks engagement → DM qualified responders
-
-### n8n Automation Workflows
-
-8,159 workflow JSONs organized by integration:
-
-| Category | Count | Top Workflows |
-|---|---|---|
-| Gmail/Email | ~874 | Cold outreach, follow-up sequences, inbox automation |
-| Slack | ~328 | Lead alerts, team notifications, status updates |
-| Telegram | ~309 | Bot responses, lead capture, CRM updates |
-| AI/GPT/LLM | ~400+ | Content generation, lead scoring, research |
-| CRM/Sales | ~121 | Apollo, HubSpot, Salesforce sync flows |
-| LinkedIn | ~80+ | Profile scraping, connection automation |
-| Google Sheets | ~200+ | Reporting, KPI tracking, data pipelines |
-| Airtable | ~150+ | CRM, lead management, project tracking |
-| Social Media | ~197 | Instagram, Twitter, Facebook automation |
-| Ecommerce | ~82 | Shopify, WooCommerce, Stripe flows |
-| SEO/Content | ~100+ | Blog auto-post, research collection |
-| Data/Reporting | ~200+ | Dashboards, analytics, KPI flows |
-
-See full manifest: [hmz-n8n-workflows](https://github.com/hmzainjamil/hmz-n8n-workflows)
-
----
-
-## Workflow Output Formats
-
-| Workflow | Output | Destination |
-|---|---|---|
-| BDM LinkedIn Sweep | Qualified lead list | Airtable CRM |
-| Indeed Pipeline | Job matches + cover letters | Email queue |
-| Cold Email Outreach | Sent email log | Airtable + Gmail |
-| Google Ads Audit | 11-page PDF | Client email |
-| Lead Gen Scrape | Structured data (JSON) | Airtable + Notion |
-| n8n Automation | Varies by workflow | Configured destination |
-
----
-
-## Daily Automation Schedule
-
-| Time | Workflow | Output |
-|---|---|---|
-| 6:30 AM | github-sync | All repos pushed to GitHub |
-| 7:00 AM | BDM LinkedIn Sweep | Fresh leads in Airtable |
-| 7:30 AM | Indeed Pipeline | New job applications queued |
-| 8:00 AM | Cold Email Outreach | Personalized emails sent |
-| On-demand | Google Ads Audit PDF | Sent to prospect |
-| On-demand | n8n workflow trigger | Webhook or manual |
-
----
-
-## Platform Rules (Enforced Across All Workflows)
-
-- **Geo blacklist:** India, Pakistan, Bangladesh, Philippines, Israel — never targeted
-- **BDM platforms:** LinkedIn + Indeed ONLY (Upwork/Freelancer/PPH removed permanently)
-- **Reddit:** Max 1 post/day (bot-watch active — never schedule 2-3/day)
-- **Chrome sessions:** Always reuse persistent profile — never trigger re-login
-- **File output:** Always to `~/Downloads/` — never Desktop
-
----
-
-## Integration Stack
-
+### Lead Generation Pipeline
 ```
-Apify MCP          → Web scraping, actor execution (zero Claude tokens)
-Apollo MCP         → Lead enrichment, contact search, email sequences
-Google Calendar    → Scheduling, event creation
-Gmail MCP          → Email sending, thread search, draft creation
-Slack MCP          → Team notifications, channel messaging
-Notion MCP         → Lead tracking, project management
-Airtable MCP       → CRM, structured data storage
-n8n (8,159 flows)  → Workflow automation layer
+Vibe Prospecting MCP → Apollo MCP enrichment → Python/openpyxl Excel formatter → Mailchimp CSV export
+Trigger: "Find [N] [business type] in [city]"
+Output: Excel with name, phone, email, website, Instagram, Facebook, Google rating, reviews
+Time: ~3 minutes for 50 leads
+```
+
+### Paid Media Audit Pipeline
+```
+Google Ads MCP → Meta Ads MCP → Paid Media Auditor agent → ReportLab PDF → ~/Downloads/
+Trigger: "Audit my Google Ads / Meta Ads"
+Output: 11-page PDF audit with ROAS, wasted spend, creative fatigue, recommendations
+Time: ~8 minutes
+```
+
+### Content Production Pipeline
+```
+SEO Specialist → keyword cluster → Content Creator → market-copy skill → market-social skill → draft → Canva/Figma
+Trigger: "Create content plan for [domain] targeting [keywords]"
+Output: Editorial calendar + 10 drafted posts + social variants
+Time: ~15 minutes
+```
+
+### Cold Outreach Pipeline
+```
+Outbound Strategist → ICP definition → Apollo prospecting → Email Intelligence Engineer → 7-email sequence → Mailchimp CSV
+Trigger: "Build cold outreach campaign for [service] targeting [ICP]"
+Output: Segmented prospect list + personalized email sequence ready to import
+Time: ~20 minutes
+```
+
+### GitHub Daily Sync Pipeline
+```
+LaunchAgent (6:30 AM) → github-sync → skills sync → agents sync → n8n manifest rebuild → credential scrub → git push → README audit → new repo discovery
+Trigger: Daily at 6:30 AM (automatic)
+Output: claude-ai-system GitHub repo fully updated
+Time: ~2 minutes
+```
+
+### Multi-LLM Burst Workflow
+```
+User prompt → skill-auto-activate hook → llm-burst → [Groq + Gemini + DeepSeek + GPT4All + Kimi K2 fire in parallel] → judge scoring → winner synthesis → Claude final output
+Trigger: Every prompt (automatic)
+Savings: 75–95% Claude token reduction vs direct Claude calls
+Time: +0.3s overhead, often faster due to parallelism
+```
+
+### UGC Ad Production Pipeline
+```
+Brief → Kimi 8K script writer (20 scripts) → Actor matcher → Arcads API parallel render → MP4s in ~/ugc-output/
+Trigger: "Generate 20 UGC ads for [product]"
+Output: 20 MP4 video ads named by hook type
+Time: ~45 minutes (parallel render)
+Cost: ~just per ad at just,500/mo tool cost → 90% gross margin
 ```
 
 ---
 
-## Full System
+## Quick Start
 
-[claude-ai-system](https://github.com/hmzainjamil/claude-ai-system) | [claude-ai-skills](https://github.com/hmzainjamil/claude-ai-skills) | [claude-ai-agents](https://github.com/hmzainjamil/claude-ai-agents) | [claude-ai-automations](https://github.com/hmzainjamil/claude-ai-automations)
+```bash
+# Trigger the lead gen pipeline
+"Find top 30 chiropractors in Dallas — phone, email, Instagram, Google rating. Export Excel."
+
+# Trigger the paid media audit
+"Full audit of my Meta Ads account — last 30 days ROAS by campaign, wasted spend, creative fatigue"
+
+# Trigger multi-LLM burst manually
+~/.claude/bin/llm-burst "Write positioning copy for my AI agency targeting e-com brands"
+
+# Trigger the content pipeline
+"Build a 30-day content calendar for [domain] targeting [keywords] — LinkedIn + Twitter + blog"
+
+# Run the full daily sync manually
+~/.claude/bin/github-sync
+```
 
 ---
 
-*Auto-updated daily by github-sync at 6:30 AM — HMZ AI Agency*
+## Use Cases
+
+| Workflow | Time | Output |
+|---|---|---|
+| Lead gen (50 leads) | ~3 min | Excel with 11 columns per lead |
+| Paid media audit | ~8 min | 11-page PDF report |
+| Content calendar | ~15 min | 30 posts + social variants |
+| Cold outreach campaign | ~20 min | Prospect list + 7-email sequence |
+| UGC ad batch (20 ads) | ~45 min | 20 MP4 video ads |
+| Technical SEO audit | ~10 min | Full audit report + fix checklist |
+| Competitor analysis | ~12 min | Positioning gaps + opportunity matrix |
+| Full GTM strategy | ~30 min | ICP + messaging + channels + 90-day calendar |
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/hmzainjamil/claude-ai-workflows.git
+
+# These workflows require the full HMZ skill stack:
+git clone https://github.com/hmzainjamil/claude-ai-skills.git ~/.claude/skills
+git clone https://github.com/hmzainjamil/claude-ai-agents.git ~/.claude/agents
+```
+
+---
+
+## Resources
+
+- **[claude-ai-system](https://github.com/hmzainjamil/claude-ai-system)** — Full HMZ system
+- **[hmz-n8n-workflows](https://github.com/hmzainjamil/hmz-n8n-workflows)** — 8,000+ n8n workflows
+- **[claude-ai-automations](https://github.com/hmzainjamil/claude-ai-automations)** — Scripts powering these workflows
+
+## License
+
+MIT
+
+---
+
+<p align="center">Built by <a href="https://github.com/hmzainjamil">Hafiz Muhammad Zulqarnain</a> &mdash; HMZ AI Agency</p>

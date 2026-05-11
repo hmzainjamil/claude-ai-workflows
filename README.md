@@ -1,85 +1,67 @@
 # claude-ai-workflows
 
-![Claude Code](https://img.shields.io/badge/Claude_Code-workflow_patterns-blue?style=flat&labelColor=000) ![OODA](https://img.shields.io/badge/framework-OODA_loop-orange?style=flat&labelColor=555) ![Multi-agent](https://img.shields.io/badge/pattern-multi--agent_orchestration-purple?style=flat&labelColor=555) ![Status](https://img.shields.io/badge/status-production-green?style=flat&labelColor=555)
+> **Production Claude Code workflows — multi-step automated pipelines for DigiMinds agency operations**
 
-Production Claude Code workflow patterns — orchestration blueprints, multi-agent coordination, scheduled task design, and OODA-driven decision frameworks. Not tutorials. Real patterns running 24/7 in the DigiMinds agency stack.
+[![workflows](https://img.shields.io/badge/workflows-production-blue?style=flat)](.) [![automation](https://img.shields.io/badge/type-automation-green?style=flat)](.) [![company](https://img.shields.io/badge/company-DigiMinds-orange?style=flat)](.)
 
-## 🧠 WHAT THIS IS
+[Overview](#overview) · [Workflows](#workflows) · [Architecture](#architecture) · [Tips](#tips)
 
-A workflow library for Claude Code power users. Each pattern solves a specific coordination challenge: how to parallelize tasks without blowing the context window, how to chain agents without losing state, how to run autonomous loops that self-correct.
+---
 
-| Pattern | File | Use Case |
-|---|---|---|
-| Parallel Research | `parallel-research.md` | Fan out to 5+ agents, synthesize results in one final call |
-| Sequential Pipeline | `sequential-pipeline.md` | A→B→C chains where each step depends on previous output |
-| Autonomous Loop | `autonomous-loop.md` | Self-running agents that monitor, decide, and act on schedule |
-| Worktree Isolation | `worktree-isolation.md` | Agent isolation with `--isolation worktree` for safe parallel edits |
-| Context Guard | `context-guard.md` | Prevent context overflow in long sessions |
-| OODA Sprint | `ooda-sprint.md` | Rapid decision-execute cycle for time-sensitive tasks |
+## 🧠 OVERVIEW
 
-## ⚙️ CORE PATTERNS
+Production multi-step workflow definitions for Claude Code — combining hooks, skills, scripts, and Paperclip API calls into automated pipelines. These workflows handle everything from audit PDF generation to lead qualification to content publishing.
 
-**Parallel Research (fan-out → synthesize):**
-```
-Agent Tool (3x simultaneous)
-├── Explore agent: "find all API endpoints"
-├── Explore agent: "find all database schemas"
-└── Explore agent: "find all auth implementations"
-    ↓ (all 3 complete)
-Sonnet: synthesize findings → single coherent report
-```
-Token cost: 3 × Tier-0-agent cost. Zero Claude tokens for research phase.
+| Component | Value |
+|---|---|
+| Trigger types | Hooks, LaunchAgent, cron, manual CLI |
+| Integration | Paperclip API, Composio, MCP servers |
+| Model routing | Tier 0 (Groq/Gemini/Ollama) — zero Claude tokens |
+| Output | PDFs, CRM entries, LinkedIn posts, audit reports |
 
-**Autonomous Loop (scheduled + self-correcting):**
-```
-Scheduled Task (cron: 0 */6 * * *)
-  1. Pull current state (Paperclip API / GA4 / CRM)
-  2. Compare to targets (KPI thresholds)
-  3. Decision tree: OK → log; MISS → create corrective task; CRITICAL → alert
-  4. Write decisions to ~/.paperclip/ceo-decisions.log
-  5. Sleep until next cron fire
-```
+---
 
-**Worktree Isolation:**
-```bash
-# Agent operates on isolated git branch — no conflict with main
-Agent(isolation: "worktree") {
-  task: "refactor auth module"
-  # → creates temp branch, edits files there
-  # → if changes made: returns worktree path + branch name
-  # → if no changes: worktree auto-cleaned
-}
-```
+## ⚙️ WORKFLOW INVENTORY
 
-## 💡 SCHEDULED TASK PATTERNS
+| Workflow | Trigger | Steps | Output |
+|---|---|---|---|
+| Cold Email + PDF | Manual/Cron | Scrape → Score → Generate PDF → Send | Per-prospect PDF + email |
+| Audit Generator | Manual | URL → Brand colors → 11-page PDF | Client audit PDF |
+| Lead Enrichment | Daily 7:30 AM | Apollo → Enrich → Score → CRM | Qualified lead list |
+| LinkedIn Publisher | Daily 8 AM | Trends → Generate → Quality check → Schedule | LinkedIn post |
+| KPI Report | Daily 6 PM | Collect → Calculate → Score → Alert | KPI scorecard |
+| CEO Loop | Every 6h | Goals → Review → Decide → Log | Decision log |
 
-DigiMinds runs 6 autonomous scheduled agents:
+---
 
-| Agent | Schedule | What It Does |
-|---|---|---|
-| CEO Strategy Loop | Every 6h | Pulls state, creates 3+ tasks, hires agents for skill gaps |
-| Lead Enrichment Engine | 7:30 AM daily | Sources 10+ leads, scores, enriches, creates BDM tasks |
-| LinkedIn Content Engine | 8:00 AM daily | Trending topic → LinkedIn post → saves to ~/Downloads/ |
-| Competitor Intel | 10:00 AM daily | Monitors competitor pricing, generates 3 strategic recs |
-| KPI Health Monitor | 6:00 PM daily | KPI audit, auto-creates corrective tasks for misses |
-| Market Trends Scanner | Mon/Wed/Fri 6 AM | 8-topic trend scan, creates opportunity tasks |
+## 💡 TIPS
 
-All scheduled via `mcp__scheduled-tasks__create_scheduled_task` — run remotely even when machine is off.
+■ **Workflow Design (5)**
+| Tip | Source |
+|---|---|
+| Every workflow step must be idempotent — safe to re-run | Design principle |
+| Use Tier 0 routing for all LLM calls inside workflows | G0DM0D3 mandate |
+| Log every step output to `~/Library/Logs/` for debugging | Ops rule |
+| Workflows that touch external APIs need retry logic | Error handling |
+| Test workflows with dry-run flag before production use | Dev workflow |
 
-## 🔧 WORKFLOW DESIGN RULES
+■ **Integration (3)**
+| Tip | Source |
+|---|---|
+| Paperclip API at port 3100 is the central hub for workflow state | Architecture |
+| Composio handles all OAuth to external services | Auth layer |
+| Apify actors handle all web scraping — never scrape with raw requests | Tool routing |
 
-1. **Context budget:** Plan before running. Each sub-agent = context cost. Fan out to Tier 0 models, not Claude.
-2. **State hand-off:** Never pass entire context between agents. Extract only the facts the next agent needs.
-3. **Idempotency:** Every workflow must be safe to re-run. No side effects on re-execution.
-4. **Failure isolation:** One agent failing should not kill the pipeline. Design fallback paths.
-5. **Output contracts:** Define expected output schema before building the agent. Test the schema first.
+---
 
-## ☠️ ANTI-PATTERNS
+## ☠️ TOOLS REPLACED
 
-| Anti-pattern | Problem | Fix |
-|---|---|---|
-| "Ask Claude to do everything" | Context overflow, high token cost | Fan out to Tier 0 agents |
-| Sequential when parallel is possible | Slow, no throughput gain | Identify independent steps, parallelize |
-| Passing full files between agents | Context explosion | Extract diffs only |
-| No idempotency | Re-run breaks state | Add existence checks before writes |
-| Long autonomous loops without state save | Context lost on compaction | Write state to file after each loop iteration |
+| Claude Workflows | Replaced |
+|---|---|
+| Automated multi-step pipelines | Manual step-by-step execution |
+| Reliable workflow execution | Fragile shell scripts |
+| State management | Forgetting where a workflow left off |
+
+---
+
+*Part of [DigiMinds AI Agency Stack](https://github.com/hmzainjamil)*

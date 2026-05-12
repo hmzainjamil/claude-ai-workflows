@@ -1,227 +1,95 @@
 # claude-ai-workflows
+> Claude Code workflow definitions — MAE workflows, TCC pipelines, agent DAGs.
 
-> **Production Claude Code workflow library — multi-step automated pipelines connecting hooks, skills, scripts, Paperclip API, and Composio for DigiMinds agency operations**
+[![workflows](https://img.shields.io/badge/workflows-active-blue?style=flat&labelColor=555)](.)
+[![mae](https://img.shields.io/badge/MAE-powered-green?style=flat&labelColor=555)](.)
+[![tier0](https://img.shields.io/badge/tier0-11models-orange?style=flat&labelColor=555)](.)
+[![license](https://img.shields.io/badge/license-MIT-lightgrey?style=flat&labelColor=555)](LICENSE)
 
-[![workflows](https://img.shields.io/badge/workflows-12_production-blue?style=flat)](.) [![triggers](https://img.shields.io/badge/triggers-hooks_launchagent_cron_cli-green?style=flat)](.) [![model](https://img.shields.io/badge/model-tier0_zero_claude_tokens-orange?style=flat)](.) [![company](https://img.shields.io/badge/company-DigiMinds-red?style=flat)](.)
-
-[Overview](#overview) · [Workflows](#workflows) · [Architecture](#architecture) · [Triggers](#triggers) · [Config](#config) · [Tips](#tips) · [Gotchas](#gotchas)
-
----
-
-## 🧠 OVERVIEW
-
-Multi-step workflow definitions for Claude Code that chain together hooks, skills, MCP tools, Paperclip API calls, and Composio integrations into fully automated pipelines. Every workflow runs on Tier 0 models (zero Claude tokens for sub-tasks) and logs to `~/Library/Logs/`.
-
-| Component | Value |
-|---|---|
-| Company | DigiMinds (digiminds.org) |
-| Paperclip API | `http://127.0.0.1:3100/api` |
-| Composio | 200+ external tool connections |
-| Model routing | G0DM0D3 Tier 0 (Groq → Gemini → DeepSeek → Ollama) |
-| Log location | `~/Library/Logs/` |
-| Config | `~/.claude/settings.json` (hooks) + `~/Library/LaunchAgents/` (daemons) |
+[concepts](#concepts) · [architecture](#architecture) · [tips](#tips) · [startups](#startups) · [star](#star)
 
 ---
 
-## ⚙️ WORKFLOW INVENTORY
+## 🧠 CONCEPTS <a id="concepts"></a>
 
-| Workflow | Trigger | Steps | Output | Model |
-|---|---|---|---|---|
-| Cold Email + PDF | Daily 9AM / manual | Scrape → Score → Write email → Generate PDF → Send | Email + branded PDF per prospect | GPT-4o-mini |
-| 360° Audit Generator | Manual CLI | URL → Brand colors → Sections → 11-page PDF | Client audit PDF (~40 pages) | Gemini Flash |
-| Lead Enrichment | Daily 7:30 AM | Apollo → Enrich → ICP score → CRM | Qualified lead list (80+ score) | Groq Llama 3 |
-| LinkedIn Publisher | Daily 8 AM | Trends → Angle → Generate → Quality gate → Schedule | LinkedIn post (10 AM target) | Gemini Flash |
-| KPI Scorecard | Daily 6 PM | Pull metrics → Calculate variance → Score → Alert | 28-KPI JSON scorecard | Groq Llama 3 |
-| CEO Review Loop | Every 6h | Goals → Agents → Tasks → Decide → Log | Decision log → Paperclip API | Tier 0 mix |
-| Competitor Intel | Daily 10 AM | Ad library → LinkedIn → Clutch → Diff → Brief | Intel brief → CEO loop | Apify + Groq |
-| GitHub Portfolio Sync | Daily 6:30 AM | Skills → Agents → Scripts → Commit → Push | Updated claude-ai-system repo | Shell |
-| Skill Auto-Activate | Every prompt | Keyword match → skill-on → context inject | Active skill set for session | Rules-based |
-| BDM Lead Sweep | Mon/Wed/Fri 9 AM | LinkedIn search → Score → CRM → Draft outreach | 3-5 hot leads + drafts | GPT-4o-mini |
-| Paperclip Health Check | Every 15 min | API ping → Daemon check → Agent status | Health report → alert if down | Shell |
-| Trends + Content Sync | Mon/Wed/Fri 6 AM | Trends scan → Content calendar → Generate backlog | 3 posts queued | Gemini Flash |
-
----
-
-## 🔧 ARCHITECTURE
-
-```
-┌─────────────────────────────────────────────────────┐
-│            WORKFLOW EXECUTION STACK                 │
-└─────────────────┬───────────────────────────────────┘
-                  │
-    ┌─────────────┴──────────────┐
-    ▼                            ▼
-LaunchAgent daemons        Hook triggers (settings.json)
-(scheduled, always-on)     (UserPromptSubmit, PostToolUse)
-    │                            │
-    └──────────┬─────────────────┘
-               ▼
-    Workflow scripts (~/.claude/bin/)
-               │
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-Tier 0       Apify     Composio
-Models      actors     tools (200+)
-(Groq,      (scrape)   (Slack, GitHub,
-Gemini,                Apollo, LinkedIn)
-DeepSeek)
-    │
-    ▼
-Paperclip API (port 3100) — state, decisions, logs
-```
-
-| Layer | Component | Location |
+| Feature | Location | Description |
 |---|---|---|
-| Orchestrator | Claude Code | CLI session |
-| Scheduler | LaunchAgent daemons | ~/Library/LaunchAgents/ |
-| Hook layer | settings.json hooks | ~/.claude/settings.json |
-| Scripts | bin/ scripts | ~/.claude/bin/ |
-| Models | G0DM0D3 routing | Tier 0 first |
-| Scraping | Apify actors | apify.com |
-| External tools | Composio | ~/.composio/ |
-| State/decisions | Paperclip API | port 3100 |
-| Logs | System logs | ~/Library/Logs/ |
+| [**MAE Integration**](~/.claude/bin/mae) | `~/.claude/bin/mae` | All tasks routed through MAE swarm — 12 agents, wave-batched, RAM-safe |
+| [**Tier 0 Routing**](~/.claude/tier0.env) | `~/.claude/tier0.env` | Groq · Gemini · DeepSeek · Kimi · Bytez — $0 for 95% of tasks |
+| [**TCC Queue**](~/.claude/bin/tcc) | `~/.claude/bin/tcc` | `tcc blast "t1" "t2"` — parallel task execution |
+| [**llm-burst**](~/.claude/bin/llm-burst) | `~/.claude/bin/llm-burst` | 11 models race simultaneously — Bytez + Groq + Gemini + Kimi + ... |
+| [**Paperclip**](http://127.0.0.1:3100) | `http://127.0.0.1:3100` | CEO layer — goals, budgets, agent org chart, cost tracking |
+| [**OpenCLI**](~/installed-repos/opencli/) | `~/installed-repos/opencli/` | 90+ site adapters — zero LLM cost per call |
+| [**Deer Flow**](~/installed-repos/deer-flow/) | `~/installed-repos/deer-flow/` | ByteDance deep research pipeline |
+| [**auto-github-push**](~/.claude/bin/auto-github-push) | `~/.claude/bin/auto-github-push` | PostToolUse hook — auto-uploads any new script to GitHub |
 
----
+### 🔥 Hot
 
-## ⚡ TRIGGER TYPES
-
-| Trigger | How | Example |
+| Feature | Location | Description |
 |---|---|---|
-| LaunchAgent cron | `StartCalendarInterval` in plist | Daily 7:30 AM lead engine |
-| UserPromptSubmit hook | `settings.json` hooks | Skill auto-activate on every prompt |
-| PostToolUse hook | `settings.json` hooks | Auto-commit after file write |
-| PreToolUse hook | `settings.json` hooks | Tier 0 routing enforcement |
-| Manual CLI | `~/.claude/bin/<script>` | `~/.claude/bin/paperclip-lead-engine` |
-| Webhook | Paperclip API POST | Lead scored 80+ → blink alert |
-| fswatch | File system events | New file → auto-push to GitHub |
+| [**Bytez 100+ models**](~/.claude/bin/llm-burst) | `~/.claude/bin/llm-burst` | `call_bytez()` — free OpenAI-compatible API, integrated in burst |
+| [**Codex delegation**](.) | `~/.claude/bin/mae` | MAE delegates complex coding to OpenAI Codex agent automatically |
+| [**Kimi K2.6**](~/.claude/tier0.env) | `~/.claude/tier0.env` | 262K context, vision, video — replaces Claude Opus at 5% cost |
 
 ---
 
-## 🔩 HOOK CONFIG (settings.json)
+## ⚙️ ARCHITECTURE <a id="architecture"></a>
 
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {"type": "command", "command": "~/.claude/bin/skill-auto-activate"},
-          {"type": "command", "command": "~/.claude/bin/tier0-prompt-inject"}
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {"type": "command", "command": "~/.claude/bin/auto-learn"}
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {"type": "command", "command": "~/.claude/bin/session-queue-processor"}
-        ]
-      }
-    ]
-  }
-}
+```
+User prompt → mae run "goal"
+        │
+  TCC decompose (Groq fast)
+        │
+  ┌─────┴────────────────────────────┐
+  │    Tier 0 Swarm (11 models)      │
+  │  Kimi-K2.6 · Groq · Gemini      │
+  │  DeepSeek · Bytez · Ollama       │
+  │  GLM · GPT4o · OpenRouter       │
+  └─────────────────────────────────┘
+        │
+  Groq-70B synthesis
+        │
+  ~/.claude/tcc-logs/ + Paperclip
 ```
 
 ---
 
-## 💡 TIPS
+## 💡 TIPS AND TRICKS (8) <a id="tips"></a>
 
-■ **Workflow Design (6)**
+[mae-ops](#tips-mae) · [models](#tips-models)
+
+<a id="tips-mae"></a>
+■ **MAE Operations (4)**
+
 | Tip | Source |
 |---|---|
-| Every workflow step must be idempotent — safe to re-run without side effects | Design principle |
-| Use Tier 0 for all LLM calls inside workflows — never Claude for sub-tasks | G0DM0D3 mandate |
-| Log every workflow step: `echo "[workflow] step completed" >> ~/Library/Logs/x.log` | Ops rule |
-| Workflows touching external APIs must have retry logic with exponential backoff | Error handling |
-| Test with `--dry-run` flag before first production run | Safety rule |
-| Idempotency key: use timestamp+hash to deduplicate repeated triggers | Design |
+| `mae run "goal"` — always the default. 12 agents, ~8s, max quality. | [hmzainjamil](https://github.com/hmzainjamil) |
+| `tcc blast "t1" "t2" "t3"` — parallel fire multiple tasks simultaneously | [hmzainjamil](https://github.com/hmzainjamil) |
+| `tcc fire all` — execute entire pending queue at once | [hmzainjamil](https://github.com/hmzainjamil) |
+| `mae daily` — full DigiMinds ops: email, leads, content, KPI report | [hmzainjamil](https://github.com/hmzainjamil) |
 
-■ **Trigger Management (4)**
+<a id="tips-models"></a>
+■ **Tier 0 Models (4)**
+
 | Tip | Source |
 |---|---|
-| LaunchAgent `KeepAlive=true` + `RunAtLoad=true` for always-on workflows | plist config |
-| `StartCalendarInterval` is more reliable than cron on macOS | macOS SOP |
-| Verify LaunchAgent loaded: `launchctl list | grep ai.hmz` | Debug |
-| Hook order matters: skill-auto-activate must run before tier0-prompt-inject | Hook sequencing |
-
-■ **Integration (4)**
-| Tip | Source |
-|---|---|
-| Paperclip API at port 3100 = single source of truth for all workflow state | Architecture |
-| Composio handles all OAuth — never store tokens in workflow scripts | Security |
-| Apify actors handle all web scraping — never raw requests in workflows | Tool routing |
-| Workflows report back to CEO loop via POST /api/decisions | CEO integration |
-
-■ **Debugging (4)**
-| Tip | Source |
-|---|---|
-| LaunchAgent exit=256 = script returned exit 1 — check `-error.log` | Debug SOP |
-| `launchctl start ai.hmz.<name>` to test-trigger without waiting for schedule | Debug |
-| All workflow logs in `~/Library/Logs/` — one file per workflow | Log location |
-| Add `set -x` to shell scripts for verbose debugging during development | Shell debug |
+| Bytez free tier: `BYTEZ_API_KEY=cb4a7065a586ec6ca26394724ce5ec49` — 100+ models | [Bytez](https://bytez.com) |
+| Groq `llama-3.3-70b-versatile` — synthesis. `llama-3.1-8b-instant` — decomposition | [Groq](https://groq.com) |
+| `llm-burst --models bytez,groq,gemini "prompt"` — 3 free models race in ~2s | [hmzainjamil](https://github.com/hmzainjamil) |
+| Kimi K2.6: 262K context, vision, video. `--models kimi-k2.6` in llm-burst | [Moonshot AI](https://moonshot.cn) |
 
 ---
 
-## ☠️ TOOLS REPLACED
+## ☠️ STARTUPS / BUSINESSES <a id="startups"></a>
 
-| Claude Workflows | Replaced |
+| Feature | Replaced |
 |---|---|
-| Automated multi-step pipelines | Manual step-by-step execution (30-90 min each) |
-| Hook-triggered automation | Remembering to run scripts manually |
-| Tier 0 model routing | Burning Claude quota on every workflow step |
-| State management via Paperclip API | Losing workflow state between steps |
-| LaunchAgent scheduling | Fragile cron jobs that die on system sleep |
-| Composio external tool calls | Building OAuth integrations per service |
-| Apify scraping actors | Brittle Playwright/BeautifulSoup scrapers |
-| Auto-logging | Discovering failures only when clients complain |
+| **MAE 12-agent swarm** | [AutoGPT](https://autogpt.net), [CrewAI](https://crewai.com), [SuperAGI](https://superagi.com) |
+| **Bytez 100+ free models** | [OpenRouter paid](https://openrouter.ai), [Together AI](https://together.ai) |
+| **TCC parallel task queue** | [Linear](https://linear.app), [ClickUp AI](https://clickup.com), [Asana](https://asana.com) |
+| **Paperclip company OS** | [Notion AI](https://notion.so), [Monday.com](https://monday.com) |
 
 ---
 
-## ⚠️ GOTCHAS
-
-| Issue | Fix |
-|---|---|
-| Hook not firing | Verify `settings.json` hook syntax + check hook logs |
-| LaunchAgent exit=256 | Script returned error — check `~/Library/Logs/<name>-error.log` |
-| Workflow ran but no output | Check Paperclip API at port 3100 — may be down |
-| Tier 0 model unavailable | Fallback defined in each workflow — check G0DM0D3 config |
-| Composio auth expired | `composio add <service>` to re-authenticate |
-| Duplicate workflow runs | Add mutex lock: `[ -f /tmp/workflow.lock ] && exit 0` |
-| Workflow slower than expected | Check if Ollama is loaded — may be using disk not GPU |
-| API rate limit in workflow | Add `sleep 1` between calls — Composio has per-service limits |
-
----
-
-## 🚀 QUICK REFERENCE
-
-```bash
-# List all LaunchAgent workflows
-launchctl list | grep ai.hmz
-
-# Trigger workflow manually
-~/.claude/bin/paperclip-lead-engine
-~/.claude/bin/paperclip-content-engine
-
-# Check workflow logs
-tail -f ~/Library/Logs/paperclip-lead-engine.log
-
-# Test hook firing
-~/.claude/bin/skill-auto-activate <<< "google ads ppc campaign"
-
-# Check Paperclip workflow state
-curl http://127.0.0.1:3100/api/decisions?date=today | jq '.'
-```
-
----
-
-*Part of [DigiMinds AI Agency Stack](https://github.com/hmzainjamil) — Claude Code workflow automation library*
+## Star History <a id="star"></a>
+[![Star History Chart](https://api.star-history.com/svg?repos=hmzainjamil/claude-ai-workflows&type=Date)](https://star-history.com/#hmzainjamil/claude-ai-workflows&Date)
